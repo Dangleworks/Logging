@@ -123,7 +123,7 @@ function onVehicleSpawn(vehicle_id, peer_id, x, y, z, cost)
 end
 
 function onVehicleLoad(vehicle_id)
-    local vehicle_details, ok = server.getVehicleDetails(vehicle_id)
+    local vehicle_data, ok = server.getVehicleData(vehicle_id)
     local req = string.format(log_requests.vehicle_spawn, 
         vehicle_id,
         vehicle_spawn_details[vehicle_id].peer_id,
@@ -131,18 +131,18 @@ function onVehicleLoad(vehicle_id)
         vehicle_spawn_details[vehicle_id].y,
         vehicle_spawn_details[vehicle_id].z,
         vehicle_spawn_details[vehicle_id].cost,
-        encode(vehicle_details.filename),
-        vehicle_details.mass,
-        vehicle_details.voxels
+        encode(vehicle_data.filename),
+        vehicle_data.mass,
+        vehicle_data.voxels
     )
     server.httpGet(log_port, req)
     vehicle_spawn_details[vehicle_id] = nil
 end
 
 function onVehicleDespawn(vehicle_id, peer_id)
-    local vehicle_details, ok = server.getVehicleDetails(vehicle_id)
+    local vehicle_data, ok = server.getVehicleData(vehicle_id)
     if not ok then
-        vehicle_details = {
+        vehicle_data = {
             x=0,
             y=0,
             z=0
@@ -151,15 +151,15 @@ function onVehicleDespawn(vehicle_id, peer_id)
 
     -- make sure to check the case of a vehicle being spawned, but not loaded
     if vehicle_spawn_details[vehicle_id] ~= nil then
-        vehicle_details = vehicle_spawn_details[vehicle_id]
+        vehicle_data = vehicle_spawn_details[vehicle_id]
     end
 
     local req = string.format(log_requests.vehicle_despawn, 
         vehicle_id,
         peer_id,
-        vehicle_details.x,
-        vehicle_details.y,
-        vehicle_details.z
+        vehicle_data.x,
+        vehicle_data.y,
+        vehicle_data.z
     )
 
     server.httpGet(log_port, req)
