@@ -32,6 +32,8 @@ log_requests = {
     button_press="/log/player/buttonpress?vehicle_id=%d&peer_id=%d&button_name=%s"
 }
 
+debugging = false
+
 -- CALLBACKS --
 function onCreate(is_world_create)
 end
@@ -46,6 +48,10 @@ function onCustomCommand(full_message, peer_id, is_admin, is_auth, command, ...)
         encode(full_message)
     )
     server.httpGet(log_port, req)
+
+    if command == "?debug" and is_admin then
+        debugging = not debugging
+    end
 end
 
 function onChatMessage(peer_id, sender_name, message)
@@ -135,6 +141,7 @@ function onVehicleLoad(vehicle_id)
         vehicle_data.mass,
         vehicle_data.voxels
     )
+    logDebug(req)
     server.httpGet(log_port, req)
     vehicle_spawn_details[vehicle_id] = nil
 end
@@ -237,4 +244,14 @@ function getUserName(peer_id)
     end
 
     return name
+end
+
+function logDebug(message)
+    if not debugging then return end
+    for _, p in ipairs(server.getPlayers()) do
+        if p.admin then
+            server.announce("[Logging-Debug]", message, p.id)
+        end
+    end
+    debug.log(message)
 end
