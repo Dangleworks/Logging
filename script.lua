@@ -68,7 +68,7 @@ end
 function onPlayerJoin(steam_id, name, peer_id, is_admin, is_auth)
     local req = string.format(log_requests.player_join, 
         steam_id,
-        name,
+        encode(name),
         peer_id,
         is_admin,
         is_auth
@@ -81,7 +81,7 @@ function onPlayerSit(peer_id, vehicle_id, seat_name)
         getSteamID(peer_id),
         peer_id,
         vehicle_id,
-        seat_name
+        encode(seat_name)
     )
     server.httpGet(log_port, req)
 end
@@ -98,7 +98,7 @@ end
 function onPlayerLeave(steam_id, name, peer_id, is_admin, is_auth)
     local req = string.format(log_requests.player_leave, 
         steam_id,
-        name,
+        encode(name),
         peer_id,
         is_admin,
         is_auth
@@ -109,7 +109,7 @@ end
 function onPlayerDie(steam_id, name, peer_id, is_admin, is_auth)
     local req = string.format(log_requests.player_die, 
         steam_id,
-        name,
+        encode(name),
         peer_id,
         is_admin,
         is_auth
