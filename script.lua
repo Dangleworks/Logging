@@ -19,16 +19,16 @@ log_settings = {
 log_port = 8000
 
 log_requests = {
-    player_customcommand="/log/player/command?steam_id=%s&peer_id=%s&name=%&is_admin=%s&is_auth=%s&command=%s",
-    player_chat="/log/player/chat?peer_id=%s&name=%s&message=%s",
-    player_join="/log/player/join?steam_id=%s&name=%s&peer_id=%s&is_admin=%s&is_auth=%s",
-    player_leave="/log/player/leave?steam_id=%s&name=%s&peer_id=%s&is_admin=%s&is_auth=%s",
-    player_sit="/log/player/sit?steam_id=%s&peer_id=%s&vehicle_id=%s&seat_name=%s",
-    player_respawn="/log/player/respawn?steam_id=%s&name=%s&peer_id=%s",
-    player_die="/log/player/die?steam_id=%s&name=%s&peer_id=%s&is_admin=%s&is_auth=%s",
-    vehicle_spawn="/log/vehicle/spawn?vehicle_id=%d&peer_id=%d&x=%d&y=%d&z=%d&cost=%d&name=%s&mass=%d&voxels=%d",
-    vehicle_despawn="/log/vehicle/despawn?vehicle_id=%d&peer_id=%d&x=%d&y=%d&z=%d",
-    vehicle_teleport="/log/vehicle/teleport?vehicle_id=%d&peer_id=%d&x=%d&y=%d&z=%d",
+    player_customcommand="/log/player/command?steam_id=%d&peer_id=%d&name=%s&is_admin=%s&is_auth=%s&command=%s",
+    player_chat="/log/player/chat?peer_id=%d&name=%s&message=%s",
+    player_join="/log/player/join?steam_id=%d&name=%s&peer_id=%d&is_admin=%s&is_auth=%s",
+    player_leave="/log/player/leave?steam_id=%d&name=%s&peer_id=%d&is_admin=%s&is_auth=%s",
+    player_sit="/log/player/sit?steam_id=%d&peer_id=%d&vehicle_id=%d&seat_name=%s",
+    player_respawn="/log/player/respawn?steam_id=%d&name=%s&peer_id=%s",
+    player_die="/log/player/die?steam_id=%d&name=%s&peer_id=%d&is_admin=%s&is_auth=%s",
+    vehicle_spawn="/log/vehicle/spawn?vehicle_id=%d&peer_id=%d&x=%0.3f&y=%0.3f&z=%0.3f&cost=%f&name=%s&mass=%f&voxels=%d",
+    vehicle_despawn="/log/vehicle/despawn?vehicle_id=%d&peer_id=%d&x=%0.3f&y=%0.3f&z=%0.3f",
+    vehicle_teleport="/log/vehicle/teleport?vehicle_id=%d&peer_id=%d&x=%0.3f&y=%0.3f&z=%0.3f",
     button_press="/log/player/buttonpress?vehicle_id=%d&peer_id=%d&button_name=%s"
 }
 
@@ -39,6 +39,11 @@ function onCreate(is_world_create)
 end
 
 function onCustomCommand(full_message, peer_id, is_admin, is_auth, command, ...)
+    if command == "?debug" and is_admin then
+        debugging = not debugging
+        server.announce("[DEBUG]", "Logging: "..debugging, peer_id)
+    end
+
     local req = string.format(log_requests.player_customcommand, 
         getSteamID(peer_id),
         peer_id,
@@ -48,10 +53,6 @@ function onCustomCommand(full_message, peer_id, is_admin, is_auth, command, ...)
         encode(full_message)
     )
     server.httpGet(log_port, req)
-
-    if command == "?debug" and is_admin then
-        debugging = not debugging
-    end
 end
 
 function onChatMessage(peer_id, sender_name, message)
@@ -130,10 +131,6 @@ end
 
 function onVehicleLoad(vehicle_id)
     local vehicle_data, ok = server.getVehicleData(vehicle_id)
-    if not ok then
-        logDebug("Failed to get vehicle data for "..vehicle_id)
-    end
-    logDebug(vehicle_spawn_details[vehicle_id].cost)
     local req = string.format(log_requests.vehicle_spawn, 
         vehicle_id,
         vehicle_spawn_details[vehicle_id].peer_id,
@@ -145,7 +142,6 @@ function onVehicleLoad(vehicle_id)
         vehicle_data.mass,
         vehicle_data.voxels
     )
-    logDebug(req)
     server.httpGet(log_port, req)
     vehicle_spawn_details[vehicle_id] = nil
 end
@@ -218,7 +214,7 @@ end
 
 -- UTIL --
 function encode(str)
-    local function cth(c)
+    function cth(c)
         return string.format("%%%02X", string.byte(c))
     end
 	if str == nil then
@@ -257,5 +253,4 @@ function logDebug(message)
             server.announce("[Logging-Debug]", message, p.id)
         end
     end
-    debug.log(message)
 end
