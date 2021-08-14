@@ -130,6 +130,10 @@ end
 
 function onVehicleLoad(vehicle_id)
     local vehicle_data, ok = server.getVehicleData(vehicle_id)
+    if not ok then
+        logDebug("Failed to get vehicle data for "..vehicle_id)
+    end
+    logDebug(vehicle_spawn_details[vehicle_id].cost)
     local req = string.format(log_requests.vehicle_spawn, 
         vehicle_id,
         vehicle_spawn_details[vehicle_id].peer_id,
