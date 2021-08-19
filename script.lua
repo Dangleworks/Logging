@@ -48,7 +48,8 @@ function onTick(game_ticks)
     calculateTPS()
     local ctime = server.getTimeMillisec()
     if stat_last_report - ctime >= stat_report_interval then
-        local stats = {
+      stat_last_report = ctime
+      local stats = {
             players=server.getPlayers(),
             tps = { instant=tps, average=Mean(tps_buff.values) }
         }
