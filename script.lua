@@ -41,12 +41,12 @@ stat_last_report = 0
 tps = 0
 ticks_time = 0
 ticks = 0
-tps_buff = NewBuffer(10)
+tps_buff = {}
 
 -- CALLBACKS --
 function onTick(game_ticks)
     calculateTPS()
-    ctime = server.getTimeMillisec()
+    local ctime = server.getTimeMillisec()
     if stat_last_report - ctime >= stat_report_interval then
         stats = {
             players=server.getPlayers(),
@@ -59,6 +59,7 @@ function onTick(game_ticks)
 end
 
 function onCreate(is_world_create)
+  tps_buff = NewBuffer(10)
 end
 
 function onCustomCommand(full_message, peer_id, is_admin, is_auth, command, ...)
