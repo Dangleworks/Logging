@@ -47,7 +47,7 @@ tps_buff = {}
 function onTick(game_ticks)
     calculateTPS()
     local ctime = server.getTimeMillisec()
-    if stat_last_report - ctime >= stat_report_interval then
+    if ctime - stat_last_report >= stat_report_interval then
       stat_last_report = ctime
       local stats = {
             players=server.getPlayers(),
