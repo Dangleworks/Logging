@@ -52,12 +52,12 @@ function onTick(game_ticks)
       local stats = {
             players=server.getPlayers(),
             tps = { instant=tps, average=Mean(tps_buff.values) }
-        }
-        local stat_string = json.stringify(stats)
-        logDebug(stat_string)
-        local req = string.format(log_requests.server_stats, encode(stat_string))
-        logDebug(req)
-        server.httpGet(log_port, req)
+      }
+      local stat_string = json.stringify(stats)
+      logDebug(stat_string)
+      local req = string.format(log_requests.server_stats, encode(stat_string))
+      logDebug(req)
+      server.httpGet(log_port, req)
     end
 end
 
