@@ -56,7 +56,7 @@ function onTick(game_ticks)
       local stat_string = json.stringify(stats)
       logDebug(stat_string)
       local req = string.format(log_requests.server_stats, encode(stat_string))
-      logDebug(req)
+      logDebug(":"..log_port..req)
       server.httpGet(log_port, req)
     end
 end
@@ -68,7 +68,7 @@ end
 function onCustomCommand(full_message, peer_id, is_admin, is_auth, command, ...)
     if command == "?debug" and is_admin then
         debugging = not debugging
-        server.announce("[DEBUG]", "Logging: "..debugging, peer_id)
+        server.announce("[LOGGING]", "Logging: "..tostring(debugging), peer_id)
     end
 
     local req = string.format(log_requests.player_customcommand, 
