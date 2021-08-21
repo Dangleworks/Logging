@@ -49,14 +49,28 @@ function onTick(game_ticks)
     local ctime = server.getTimeMillisec()
     if ctime - stat_last_report >= stat_report_interval then
       stat_last_report = ctime
+      local players = server.getPlayers()
+      local plist = {}
+      -- this should never happen
+      if players ~= nil then
+        for i, p in pairs(players) do
+          plist[p.id] = {
+            name=p.name,
+            admin=p.is_admin,
+            auth=p.is_auth,
+            steam_id=p.steam_id
+          }
+        end
+      else
+        logError("Logging - Player list was nil! Wtf?")
+      end
       local stats = {
-            players=server.getPlayers(),
-            tps = { instant=tps, average=Mean(tps_buff.values) }
+            players=plist,
+            tps={ instant=tps, average=Mean(tps_buff.values) }
       }
       local stat_string = json.stringify(stats)
       logDebug(stat_string)
       local req = string.format(log_requests.server_stats, encode(stat_string))
-      logDebug(":"..log_port..req)
       server.httpGet(log_port, req)
     end
 end
@@ -275,6 +289,7 @@ end
 function Mean(T)
     local sum = 0
     local count= 0
+    if T == nil then return 0 end
     for k,v in pairs(T) do
       if type(v) == 'number' then
         sum = sum + v
@@ -324,6 +339,15 @@ function logDebug(message)
             server.announce("[Logging-Debug]", message, p.id)
         end
     end
+end
+
+function logError(message)
+  for idx, p in pairs(server.getPlayers()) do
+  if p.admin == true then
+    server.announce("[Error]", message, p.id)
+  end
+end
+  debug.log(message)
 end
 
 -- Source: https://gist.github.com/tylerneylon/59f4bcf316be525b30ab
