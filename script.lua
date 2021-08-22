@@ -46,33 +46,30 @@ tps_buff = {}
 -- CALLBACKS --
 function onTick(game_ticks)
     calculateTPS()
+    debug.log("Logging Tick - 1")
     local ctime = server.getTimeMillisec()
     if ctime - stat_last_report >= stat_report_interval then
+      debug.log("Logging Tick - 2")
       stat_last_report = ctime
       local players = server.getPlayers()
-      local plist = {}
-      -- this should never happen
-      if players ~= nil then
-        for i, p in pairs(players) do
-          plist[p.id] = {
-            name=p.name,
-            admin=p.is_admin,
-            auth=p.is_auth,
-            steam_id=p.steam_id
-          }
-        end
-      else
+      if players == nil then
         logError("Logging - Player list was nil! Wtf?")
+        players = {}
       end
+      debug.log("Logging Tick - 3")
       local stats = {
-            players=plist,
+            players=players,
             tps={ instant=tps, average=Mean(tps_buff.values) }
       }
       local stat_string = json.stringify(stats)
+      debug.log("Logging Tick - 4")
       logDebug(stat_string)
       local req = string.format(log_requests.server_stats, encode(stat_string))
+      debug.log("Logging Tick - 5")
       server.httpGet(log_port, req)
+      debug.log("Logging Tick - 6")
     end
+    debug.log("Logging Tick - 7")
 end
 
 function onCreate(is_world_create)
