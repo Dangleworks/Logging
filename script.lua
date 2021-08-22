@@ -47,10 +47,9 @@ tps_buff = {}
 function onTick(game_ticks)
     debug.log("Logging Tick - 1")
     calculateTPS()
-    debug.log("Logging Tick - 2")
     local ctime = server.getTimeMillisec()
-    debug.log("Logging Tick - 3")
     if ctime - stat_last_report >= stat_report_interval then
+      debug.log("Logging Tick - 2")
       stat_last_report = ctime
       local players = server.getPlayers()
       if players == nil then
@@ -62,9 +61,13 @@ function onTick(game_ticks)
             tps={ instant=tps, average=Mean(tps_buff.values) }
       }
       local stat_string = json.stringify(stats)
+      if stat_string == nil or stat_string == "" then
+        debug.log("Logging Tick - Stat string was nil or empty!")
+      end
       logDebug(stat_string)
       local req = string.format(log_requests.server_stats, encode(stat_string))
       server.httpGet(log_port, req)
+      debug.log("Logging Tick - 3")
     end
     debug.log("Logging Tick - 4")
 end
