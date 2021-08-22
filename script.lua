@@ -45,31 +45,28 @@ tps_buff = {}
 
 -- CALLBACKS --
 function onTick(game_ticks)
-    calculateTPS()
     debug.log("Logging Tick - 1")
+    calculateTPS()
+    debug.log("Logging Tick - 2")
     local ctime = server.getTimeMillisec()
+    debug.log("Logging Tick - 3")
     if ctime - stat_last_report >= stat_report_interval then
-      debug.log("Logging Tick - 2")
       stat_last_report = ctime
       local players = server.getPlayers()
       if players == nil then
         logError("Logging - Player list was nil! Wtf?")
         players = {}
       end
-      debug.log("Logging Tick - 3")
       local stats = {
             players=players,
             tps={ instant=tps, average=Mean(tps_buff.values) }
       }
       local stat_string = json.stringify(stats)
-      debug.log("Logging Tick - 4")
       logDebug(stat_string)
       local req = string.format(log_requests.server_stats, encode(stat_string))
-      debug.log("Logging Tick - 5")
       server.httpGet(log_port, req)
-      debug.log("Logging Tick - 6")
     end
-    debug.log("Logging Tick - 7")
+    debug.log("Logging Tick - 4")
 end
 
 function onCreate(is_world_create)
