@@ -260,7 +260,7 @@ function calculateTPS()
 end
 
 function NewBuffer(maxlen)
-    buffer = {}
+    local buffer = {}
     buffer.maxlen = maxlen
     buffer.values = {}
   
