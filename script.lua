@@ -4,17 +4,17 @@ log_settings = {
     player_chat = true,
     player_join = true,
     player_leave = true,
-    player_sit = true,
+    player_sit = false,
     player_respawn = true,
     player_die = true,
-    player_button_press = true,
+    player_button_press = false,
     vehicle_spawn = true,
     vehicle_despawn = true,
-    vehicle_damage = true,
-    fire_extinguished = true,
-    forest_fire_lit = true,
-    forest_fire_extinguished = true,
-    addon_component_spawn = true
+    vehicle_damage = false,
+    fire_extinguished = false,
+    forest_fire_lit = false,
+    forest_fire_extinguished = false,
+    addon_component_spawn = false
 }
 log_port = 8000
 log_requests = {
@@ -209,10 +209,11 @@ function onSpawnAddonComponent(component_id, component_name, TYPE_STRING,
 -- UTIL --
 function calculateTPS()
     ticks = ticks + 1
-    if server.getTimeMillisec() - ticks_time >= 500 then
+    local ctime = server.getTimeMillisec()
+    if  ctime - ticks_time >= 500 then
         tps = ticks * 2
         ticks = 0
-        ticks_time = server.getTimeMillisec()
+        ticks_time = ctime
         tps_buff.Push(tps)
     end
 end
