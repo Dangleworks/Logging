@@ -25,7 +25,7 @@ log_requests = {
     player_sit = "/log/player/sit?steam_id=%d&peer_id=%d&vehicle_id=%d&seat_name=%s",
     player_respawn = "/log/player/respawn?steam_id=%d&name=%s&peer_id=%s",
     player_die = "/log/player/die?steam_id=%d&name=%s&peer_id=%d&is_admin=%s&is_auth=%s",
-    vehicle_spawn = "/log/vehicle/spawn?vehicle_id=%d&peer_id=%d&x=%0.3f&y=%0.3f&z=%0.3f&cost=%f&name=%s&mass=%f&voxels=%d",
+    vehicle_spawn = "/log/vehicle/spawn?vehicle_id=%d&peer_id=%d&steam_id=%d&x=%0.3f&y=%0.3f&z=%0.3f&cost=%f&name=%s&mass=%f&voxels=%d",
     vehicle_despawn = "/log/vehicle/despawn?vehicle_id=%d&peer_id=%d&x=%0.3f&y=%0.3f&z=%0.3f",
     vehicle_teleport = "/log/vehicle/teleport?vehicle_id=%d&peer_id=%d&x=%0.3f&y=%0.3f&z=%0.3f",
     button_press = "/log/player/buttonpress?vehicle_id=%d&peer_id=%d&button_name=%s",
@@ -93,9 +93,8 @@ function onChatMessage(peer_id, sender_name, message)
 
     if not log_settings.player_chat then return end
 
-    local req = string.format(log_requests.player_chat,
-    -- getSteamID(user_peer_id),
-                              peer_id, encode(sender_name), encode(message))
+    local req = string.format(log_requests.player_chat, peer_id,
+                              encode(sender_name), encode(message))
     server.httpGet(log_port, req)
 end
 
@@ -150,13 +149,16 @@ end
 
 function onVehicleLoad(vehicle_id)
     local vehicle_data, ok = server.getVehicleData(vehicle_id)
-    local req = string.format(log_requests.vehicle_spawn, vehicle_id,
+    local req = string.format(log_requests.vehicle_spawn, 
+                              vehicle_id,
                               vehicle_spawn_details[vehicle_id].peer_id,
+                              getSteamID(vehicle_spawn_details[vehicle_id].peer_id),
                               vehicle_spawn_details[vehicle_id].x,
                               vehicle_spawn_details[vehicle_id].y,
                               vehicle_spawn_details[vehicle_id].z,
                               vehicle_spawn_details[vehicle_id].cost,
-                              encode(vehicle_data.filename), vehicle_data.mass,
+                              encode(vehicle_data.filename), 
+                              vehicle_data.mass,
                               vehicle_data.voxels)
     server.httpGet(log_port, req)
     vehicle_spawn_details[vehicle_id] = nil
