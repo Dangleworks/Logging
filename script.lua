@@ -49,7 +49,6 @@ function onTick(game_ticks)
     calculateTPS()
     local ctime = server.getTimeMillisec()
     if ctime - stat_last_report >= stat_report_interval then
-        debug.log("Logging Tick - 2")
         stat_last_report = ctime
         local players = server.getPlayers()
         if players == nil then
@@ -64,13 +63,14 @@ function onTick(game_ticks)
         if stat_string == nil or stat_string == "" then
             debug.log("Logging Tick - Stat string was nil or empty!")
         end
+        debug.log(stat_string)
         logDebug(stat_string)
         local req =
             string.format(log_requests.server_stats, encode(stat_string))
         server.httpGet(log_port, req)
-        debug.log("Logging Tick - 3")
+        debug.log("Logging Tick - 2")
     end
-    debug.log("Logging Tick - 4")
+    debug.log("Logging Tick - 3")
 end
 
 function onCreate(is_world_create) tps_buff = NewBuffer(10) end
