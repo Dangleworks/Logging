@@ -45,11 +45,11 @@ tps_buff = {}
 
 -- CALLBACKS --
 function onTick(game_ticks)
-    debug.log("Logging Tick - 1")
     calculateTPS()
     local ctime = server.getTimeMillisec()
     if ctime - stat_last_report >= stat_report_interval then
         stat_last_report = ctime
+
         local players = server.getPlayers()
         if players == nil then
             logError("Logging - Player list was nil! Wtf?")
@@ -68,9 +68,7 @@ function onTick(game_ticks)
         local req =
             string.format(log_requests.server_stats, encode(stat_string))
         server.httpGet(log_port, req)
-        debug.log("Logging Tick - 2")
     end
-    debug.log("Logging Tick - 3")
 end
 
 function onCreate(is_world_create) tps_buff = NewBuffer(10) end
@@ -366,7 +364,7 @@ function json.stringify(obj, as_key)
         if as_key then error('Can\'t encode array as key.') end
         s[#s + 1] = '['
         for i, val in ipairs(obj) do
-            if i > 1 then s[#s + 1] = ', ' end
+            if i > 1 then s[#s + 1] = ',' end
             s[#s + 1] = json.stringify(val)
         end
         s[#s + 1] = ']'
@@ -374,7 +372,7 @@ function json.stringify(obj, as_key)
         if as_key then error('Can\'t encode table as key.') end
         s[#s + 1] = '{'
         for k, v in pairs(obj) do
-            if #s > 1 then s[#s + 1] = ', ' end
+            if #s > 1 then s[#s + 1] = ',' end
             s[#s + 1] = json.stringify(k, true)
             s[#s + 1] = ':'
             s[#s + 1] = json.stringify(v)
