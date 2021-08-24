@@ -49,14 +49,7 @@ function onTick(game_ticks)
     local ctime = server.getTimeMillisec()
     if ctime - stat_last_report >= stat_report_interval then
         stat_last_report = ctime
-
-        local players = server.getPlayers()
-        if players == nil then
-            logError("Logging - Player list was nil! Wtf?")
-            players = {}
-        end
         local stats = {
-            players = players,
             tps = {instant = tps, average = Mean(tps_buff.values)}
         }
         local stat_string = json.stringify(stats)
