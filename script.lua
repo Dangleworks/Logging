@@ -165,17 +165,29 @@ function onVehicleLoad(vehicle_id)
 end
 
 function onVehicleDespawn(vehicle_id, peer_id)
-    local vehicle_data, ok = server.getVehicleData(vehicle_id)
-    if not ok then vehicle_data = {x = 0, y = 0, z = 0} end
+    local vd, ok = server.getVehicleData(vehicle_id)
+    local vehicle_data = {x=0,y=0,z=0}
+    if ok then
+        local x,y,z = matrix.position(vd.trasnform)
+        vehicle_data = {
+            x=x,
+            y=y,
+            z=z
+        }
+    end
 
     -- make sure to check the case of a vehicle being spawned, but not loaded
     if vehicle_spawn_details[vehicle_id] ~= nil then
+        logDebug("Vehicle was despawned before it was loaded")
         vehicle_data = vehicle_spawn_details[vehicle_id]
+        vehicle_spawn_details[vehicle_id] = nil
     end
+
     local req = string.format(log_requests.vehicle_despawn, vehicle_id, peer_id,
                               vehicle_data.x, vehicle_data.y, vehicle_data.z)
-    vehicle_spawn_details[vehicle_id] = nil
+
     if not log_settings.vehicle_despawn then return end
+
     server.httpGet(log_port, req)
 end
 
