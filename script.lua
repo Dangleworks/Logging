@@ -60,7 +60,7 @@ function onTick(game_ticks)
         logDebug(stat_string)
         local req =
             string.format(log_requests.server_stats, encode(stat_string))
-        server.httpGet(log_port, req)
+        --server.httpGet(log_port, req)
     end
 end
 
