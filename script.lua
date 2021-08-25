@@ -14,7 +14,8 @@ log_settings = {
     fire_extinguished = false,
     forest_fire_lit = false,
     forest_fire_extinguished = false,
-    addon_component_spawn = false
+    addon_component_spawn = false,
+    statistics = true
 }
 log_port = 8000
 log_requests = {
@@ -32,7 +33,6 @@ log_requests = {
     server_stats = "/stats?data=%s"
 }
 
-send_stats = true
 stat_report_interval = 1000
 
 --- RUNTIME VARIABLES ---
@@ -45,22 +45,26 @@ tps_buff = {}
 
 -- CALLBACKS --
 function onTick(game_ticks)
+    if not log_settings.statistics then return end
     calculateTPS()
     local ctime = server.getTimeMillisec()
     if ctime - stat_last_report >= stat_report_interval then
         stat_last_report = ctime
         local stats = {
+            players = server.getPlayers(),
             tps = {instant = tps, average = Mean(tps_buff.values)}
         }
         local stat_string = json.stringify(stats)
         if stat_string == nil or stat_string == "" then
-            debug.log("Logging Tick - Stat string was nil or empty!")
+            logError("Logging Tick - Stat string was nil or empty!")
+            return
         end
-        debug.log(stat_string)
         logDebug(stat_string)
+
         local req =
             string.format(log_requests.server_stats, encode(stat_string))
-        --server.httpGet(log_port, req)
+
+        server.httpGet(log_port, req)
     end
 end
 
