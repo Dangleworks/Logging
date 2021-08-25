@@ -279,7 +279,7 @@ end
 
 function getSteamID(peer_id)
     for _, p in pairs(server.getPlayers()) do
-        if tostring(p.id) == peer_id then return p.steam_id end
+        if tostring(p.id) == tostring(peer_id) then return p.steam_id end
     end
     return 0
 end
