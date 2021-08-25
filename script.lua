@@ -139,8 +139,15 @@ function onVehicleSpawn(vehicle_id, peer_id, x, y, z, cost)
 end
 
 function onVehicleLoad(vehicle_id)
+    if not log_settings.vehicle_spawn then return end
     local vehicle_data, ok = server.getVehicleData(vehicle_id)
-    local req = string.format(log_requests.vehicle_spawn, 
+    if not ok then 
+        logError("Logging onVehicleLoad - failed to get vehicle data")
+        vehicle_spawn_details[vehicle_id] = nil
+        return
+    end
+
+    local req = string.format(log_requests.vehicle_spawn,
                               vehicle_id,
                               vehicle_spawn_details[vehicle_id].peer_id,
                               getSteamID(vehicle_spawn_details[vehicle_id].peer_id),
@@ -151,6 +158,7 @@ function onVehicleLoad(vehicle_id)
                               encode(vehicle_data.filename), 
                               vehicle_data.mass,
                               vehicle_data.voxels)
+    logDebug(req)
     server.httpGet(log_port, req)
     vehicle_spawn_details[vehicle_id] = nil
 end
