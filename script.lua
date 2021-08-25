@@ -43,10 +43,10 @@ ticks_time = 0
 ticks = 0
 tps_buff = {}
 req_sent = false
+http_q = {}
 
 -- CALLBACKS --
 function onTick(game_ticks)
-    if not log_settings.statistics then return end
     calculateTPS()
     local ctime = server.getTimeMillisec()
     if ctime - stat_last_report >= stat_report_interval then
@@ -65,10 +65,14 @@ function onTick(game_ticks)
         local req =
             string.format(log_requests.server_stats, encode(stat_string))
 
-        if not req_sent then
-            server.httpGet(log_port, req)
+        if log_settings.statistics then
+            table.insert(http_q, req)
         end
-        req_sent = false
+    end
+
+    for i, r in ipairs(http_q) do
+        server.httpGet(log_port, r)
+        table.remove(http_q, i)
     end
 end
 
@@ -82,11 +86,14 @@ function onCustomCommand(full_message, peer_id, is_admin, is_auth, command, ...)
 
     if not log_settings.player_customcommand then return end
     local req = string.format(log_requests.player_customcommand,
-                              getSteamID(peer_id), peer_id,
-                              encode(getUserName(peer_id)), is_admin, is_auth,
+                              getSteamID(peer_id), 
+                              peer_id,
+                              encode(getUserName(peer_id)), 
+                              is_admin, 
+                              is_auth,
                               encode(full_message))
-    server.httpGet(log_port, req)
-    req_sent = true
+    --server.httpGet(log_port, req)
+    table.insert(http_q, req)
 end
 
 function onChatMessage(peer_id, sender_name, message)
@@ -95,48 +102,48 @@ function onChatMessage(peer_id, sender_name, message)
 
     local req = string.format(log_requests.player_chat, peer_id,
                               encode(sender_name), encode(message))
-    server.httpGet(log_port, req)
-    req_sent = true
+    --server.httpGet(log_port, req)
+    table.insert(http_q, req)
 end
 
 function onPlayerJoin(steam_id, name, peer_id, is_admin, is_auth)
     if not log_settings.player_join then return end
     local req = string.format(log_requests.player_join, steam_id, encode(name),
                               peer_id, is_admin, is_auth)
-    server.httpGet(log_port, req)
-    req_sent = true
+    --server.httpGet(log_port, req)
+    table.insert(http_q, req)
 end
 
 function onPlayerSit(peer_id, vehicle_id, seat_name)
     if not log_settings.player_sit then return end
     local req = string.format(log_requests.player_sit, getSteamID(peer_id),
                               peer_id, vehicle_id, encode(seat_name))
-    server.httpGet(log_port, req)
-    req_sent = true
+    --server.httpGet(log_port, req)
+    table.insert(http_q, req)
 end
 
 function onPlayerRespawn(peer_id)
     if not log_settings.player_respawn then return end
     local req = string.format(log_requests.player_respawn, getSteamID(peer_id),
                               getUserName(peer_id), peer_id)
-    server.httpGet(log_port, req)
-    req_sent = true
+    --server.httpGet(log_port, req)
+    table.insert(http_q, req)
 end
 
 function onPlayerLeave(steam_id, name, peer_id, is_admin, is_auth)
     if not log_settings.player_leave then return end
     local req = string.format(log_requests.player_leave, steam_id, encode(name),
                               peer_id, is_admin, is_auth)
-    server.httpGet(log_port, req)
-    req_sent = true
+    --server.httpGet(log_port, req)
+    table.insert(http_q, req)
 end
 
 function onPlayerDie(steam_id, name, peer_id, is_admin, is_auth)
     if not log_settings.player_die then return end
     local req = string.format(log_requests.player_die, steam_id, encode(name),
                               peer_id, is_admin, is_auth)
-    server.httpGet(log_port, req)
-    req_sent = true
+    --server.httpGet(log_port, req)
+    table.insert(http_q, req)
 end
 
 vehicle_spawn_details = {}
@@ -175,8 +182,8 @@ function onVehicleLoad(vehicle_id)
                               vehicle_data.mass,
                               vehicle_data.voxels)
     logDebug(req)
-    server.httpGet(log_port, req)
-    req_sent = true
+    --server.httpGet(log_port, req)
+    table.insert(http_q, req)
     vehicle_spawn_details[vehicle_id] = nil
 end
 
@@ -204,8 +211,8 @@ function onVehicleDespawn(vehicle_id, peer_id)
 
     if not log_settings.vehicle_despawn then return end
 
-    server.httpGet(log_port, req)
-    req_sent = true
+    --server.httpGet(log_port, req)
+    table.insert(http_q, req)
 end
 
 function onVehicleTeleport(vehicle_id, peer_id, x, y, z)
@@ -213,8 +220,8 @@ function onVehicleTeleport(vehicle_id, peer_id, x, y, z)
     local req = string.format(log_requests.vehicle_teleport, vehicle_id,
                               peer_id, x, y, z)
 
-    server.httpGet(log_port, req)
-    req_sent = true
+    --server.httpGet(log_port, req)
+    table.insert(http_q, req)
 end
 
 function onButtonPress(vehicle_id, peer_id, button_name)
@@ -222,8 +229,8 @@ function onButtonPress(vehicle_id, peer_id, button_name)
     local req = string.format(log_requests.button_press, vehicle_id, peer_id,
                               encode(button_name))
 
-    server.httpGet(log_port, req)
-    req_sent = true
+    --server.httpGet(log_port, req)
+    table.insert(http_q, req)
 end
 
 function onVehicleDamaged(vehicle_id, damage_amount, voxel_x, voxel_y, voxel_z) end
