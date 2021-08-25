@@ -146,6 +146,7 @@ function onVehicleLoad(vehicle_id)
         vehicle_spawn_details[vehicle_id] = nil
         return
     end
+    logDebug(tostring(getSteamID(vehicle_spawn_details[vehicle_id].peer_id)))
 
     local req = string.format(log_requests.vehicle_spawn,
                               vehicle_id,
@@ -155,7 +156,7 @@ function onVehicleLoad(vehicle_id)
                               vehicle_spawn_details[vehicle_id].y,
                               vehicle_spawn_details[vehicle_id].z,
                               vehicle_spawn_details[vehicle_id].cost,
-                              encode(vehicle_data.filename), 
+                              encode(vehicle_data.filename),
                               vehicle_data.mass,
                               vehicle_data.voxels)
     logDebug(req)
@@ -264,6 +265,7 @@ function getSteamID(peer_id)
     for _, p in pairs(server.getPlayers()) do
         if tostring(p.id) == peer_id then return p.steam_id end
     end
+    return 0
 end
 
 function getUserName(peer_id)
