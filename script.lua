@@ -47,6 +47,7 @@ http_q = {}
 
 -- CALLBACKS --
 function onTick(game_ticks)
+    --[[
     calculateTPS()
     local ctime = server.getTimeMillisec()
     if ctime - stat_last_report >= stat_report_interval then
@@ -69,7 +70,7 @@ function onTick(game_ticks)
             table.insert(http_q, req)
         end
     end
-
+    ]]
     for i, r in ipairs(http_q) do
         server.httpGet(log_port, r)
         table.remove(http_q, i)
