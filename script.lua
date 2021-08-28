@@ -43,7 +43,6 @@ ticks_time = 0
 ticks = 0
 tps_buff = {}
 req_sent = false
-http_q = {}
 
 -- CALLBACKS --
 function onTick(game_ticks)
@@ -71,10 +70,6 @@ function onTick(game_ticks)
         end
     end
     ]]
-    for i, r in ipairs(http_q) do
-        server.httpGet(log_port, r)
-        table.remove(http_q, i)
-    end
 end
 
 function onCreate(is_world_create) tps_buff = NewBuffer(10) end
@@ -93,8 +88,7 @@ function onCustomCommand(full_message, peer_id, is_admin, is_auth, command, ...)
                               is_admin, 
                               is_auth,
                               encode(full_message))
-    --server.httpGet(log_port, req)
-    table.insert(http_q, req)
+    server.httpGet(log_port, req)
 end
 
 function onChatMessage(peer_id, sender_name, message)
@@ -103,48 +97,42 @@ function onChatMessage(peer_id, sender_name, message)
 
     local req = string.format(log_requests.player_chat, peer_id,
                               encode(sender_name), encode(message))
-    --server.httpGet(log_port, req)
-    table.insert(http_q, req)
+    server.httpGet(log_port, req)
 end
 
 function onPlayerJoin(steam_id, name, peer_id, is_admin, is_auth)
     if not log_settings.player_join then return end
     local req = string.format(log_requests.player_join, steam_id, encode(name),
                               peer_id, is_admin, is_auth)
-    --server.httpGet(log_port, req)
-    table.insert(http_q, req)
+    server.httpGet(log_port, req)
 end
 
 function onPlayerSit(peer_id, vehicle_id, seat_name)
     if not log_settings.player_sit then return end
     local req = string.format(log_requests.player_sit, getSteamID(peer_id),
                               peer_id, vehicle_id, encode(seat_name))
-    --server.httpGet(log_port, req)
-    table.insert(http_q, req)
+    server.httpGet(log_port, req)
 end
 
 function onPlayerRespawn(peer_id)
     if not log_settings.player_respawn then return end
     local req = string.format(log_requests.player_respawn, getSteamID(peer_id),
                               getUserName(peer_id), peer_id)
-    --server.httpGet(log_port, req)
-    table.insert(http_q, req)
+    server.httpGet(log_port, req)
 end
 
 function onPlayerLeave(steam_id, name, peer_id, is_admin, is_auth)
     if not log_settings.player_leave then return end
     local req = string.format(log_requests.player_leave, steam_id, encode(name),
                               peer_id, is_admin, is_auth)
-    --server.httpGet(log_port, req)
-    table.insert(http_q, req)
+    server.httpGet(log_port, req)
 end
 
 function onPlayerDie(steam_id, name, peer_id, is_admin, is_auth)
     if not log_settings.player_die then return end
     local req = string.format(log_requests.player_die, steam_id, encode(name),
                               peer_id, is_admin, is_auth)
-    --server.httpGet(log_port, req)
-    table.insert(http_q, req)
+    server.httpGet(log_port, req)
 end
 
 vehicle_spawn_details = {}
@@ -169,7 +157,6 @@ function onVehicleLoad(vehicle_id)
         vehicle_spawn_details[vehicle_id] = nil
         return
     end
-    logDebug(tostring(getSteamID(vehicle_spawn_details[vehicle_id].peer_id)))
 
     local req = string.format(log_requests.vehicle_spawn,
                               vehicle_id,
@@ -182,9 +169,7 @@ function onVehicleLoad(vehicle_id)
                               encode(vehicle_data.filename),
                               vehicle_data.mass,
                               vehicle_data.voxels)
-    logDebug(req)
-    --server.httpGet(log_port, req)
-    table.insert(http_q, req)
+    server.httpGet(log_port, req)
     vehicle_spawn_details[vehicle_id] = nil
 end
 
@@ -212,8 +197,7 @@ function onVehicleDespawn(vehicle_id, peer_id)
 
     if not log_settings.vehicle_despawn then return end
 
-    --server.httpGet(log_port, req)
-    table.insert(http_q, req)
+    server.httpGet(log_port, req)
 end
 
 function onVehicleTeleport(vehicle_id, peer_id, x, y, z)
@@ -221,8 +205,7 @@ function onVehicleTeleport(vehicle_id, peer_id, x, y, z)
     local req = string.format(log_requests.vehicle_teleport, vehicle_id,
                               peer_id, x, y, z)
 
-    --server.httpGet(log_port, req)
-    table.insert(http_q, req)
+    server.httpGet(log_port, req)
 end
 
 function onButtonPress(vehicle_id, peer_id, button_name)
@@ -230,20 +213,8 @@ function onButtonPress(vehicle_id, peer_id, button_name)
     local req = string.format(log_requests.button_press, vehicle_id, peer_id,
                               encode(button_name))
 
-    --server.httpGet(log_port, req)
-    table.insert(http_q, req)
+    server.httpGet(log_port, req)
 end
-
-function onVehicleDamaged(vehicle_id, damage_amount, voxel_x, voxel_y, voxel_z) end
-
-function onFireExtinguished(fire_x, fire_y, fire_z) end
-
-function onForestFireSpawned(fire_objective_id, fire_x, fire_y, fire_z) end
-
-function onForestFireExtinguished(fire_objective_id, fire_x, fire_y, fire_z) end
-
-function onSpawnAddonComponent(component_id, component_name, TYPE_STRING,
-                               addon_index) end
 
 -- UTIL --
 function calculateTPS()
